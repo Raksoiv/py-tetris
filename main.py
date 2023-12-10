@@ -4,6 +4,7 @@ import pygame
 
 from game_state import GameState
 from layer import TetronimoLayer
+from command import MoveCommand
 from settings import *
 
 
@@ -21,12 +22,13 @@ class Game:
         self.layers = [
             TetronimoLayer(self.game_state)
         ]
+        self.commands = []
 
     def _timers(self):
         # Tetronimo down timer
         self.tetronimo_down_event = pygame.USEREVENT + 0
         self.tetronimo_down_trigger = False
-        pygame.time.set_timer(self.tetronimo_down_event, TETRONIMO_DOWN_INTERVAL)
+        pygame.time.set_timer(self.tetronimo_down_event, INITIAL_TETRONIMO_DOWN_INTERVAL)
 
     def _handle_events(self):
         for event in pygame.event.get():
@@ -37,7 +39,13 @@ class Game:
                 self.tetronimo_down_trigger = True
 
     def _update(self):
-        pass
+        if self.tetronimo_down_trigger:
+            self.commands.append(MoveCommand(self.game_state.tetronimo, pygame.Vector2(0, 1)))
+            self.tetronimo_down_trigger = False
+
+        for command in self.commands:
+            command.run()
+        self.commands.clear()
 
     def _render(self):
         self.screen.fill((36, 36, 36))

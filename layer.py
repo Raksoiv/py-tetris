@@ -10,6 +10,9 @@ class Layer:
         self.tile_size = game_state.tile_size
         self.tile_margin = game_state.tile_margin
 
+    def render(self, surface: Surface) -> None:
+        raise NotImplementedError()
+
 
 class TetronimoLayer(Layer):
     def __init__(self, game_state: GameState) -> None:
