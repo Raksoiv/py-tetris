@@ -2,6 +2,8 @@ import sys
 
 import pygame
 
+from game_state import GameState
+from layer import TetronimoLayer
 from settings import *
 
 
@@ -13,23 +15,44 @@ class Game:
         self.screen = pygame.display.set_mode(WINDOW_RESOLUTION)
         self.clock = pygame.time.Clock()
 
-    def _update(self):
-        self.clock.tick(FPS)
+        self._timers()
 
-    def _draw(self):
-        pygame.display.flip()
+        self.game_state = GameState(FIELD_SIZE, TILE_SIZE, TILE_MARGIN)
+        self.layers = [
+            TetronimoLayer(self.game_state)
+        ]
+
+    def _timers(self):
+        # Tetronimo down timer
+        self.tetronimo_down_event = pygame.USEREVENT + 0
+        self.tetronimo_down_trigger = False
+        pygame.time.set_timer(self.tetronimo_down_event, TETRONIMO_DOWN_INTERVAL)
 
     def _handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
+            elif event.type == self.tetronimo_down_event:
+                self.tetronimo_down_trigger = True
+
+    def _update(self):
+        pass
+
+    def _render(self):
+        self.screen.fill((36, 36, 36))
+
+        for layer in self.layers:
+            layer.render(self.screen)
+
+        pygame.display.flip()
 
     def run(self):
         while True:
             self._handle_events()
             self._update()
-            self._draw()
+            self._render()
+            self.clock.tick(FPS)
 
 
 if __name__ == "__main__":
