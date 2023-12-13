@@ -40,7 +40,9 @@ class Game:
 
     def _update(self):
         if self.tetronimo_down_trigger:
-            self.commands.append(MoveCommand(self.game_state.tetronimo, pygame.Vector2(0, 1)))
+            self.commands.append(
+                MoveCommand(self.game_state, self.game_state.tetronimo, pygame.Vector2(0, 1)),
+            )
             self.tetronimo_down_trigger = False
 
         for command in self.commands:
