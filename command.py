@@ -18,7 +18,11 @@ class MoveCommand(Command):
         self.direction = direction
 
     def run(self) -> None:
-        if not self.game_state.tetronimo_inside_field(self.target):
+        new_blocks_position = [block.pos + self.direction for block in self.target.blocks]
+        if self.game_state.check_blocks_collide(new_blocks_position):
+            if self.direction.y > 0:
+                self.game_state.solidify_tetronimo(self.target)
             return
 
-        self.target.move(self.direction)
+        for block in self.target.blocks:
+            block.pos += self.direction

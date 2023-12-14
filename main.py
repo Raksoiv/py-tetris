@@ -1,10 +1,11 @@
 import sys
+from typing import List
 
 import pygame
 
+from command import Command, MoveCommand
 from game_state import GameState
-from layer import TetronimoLayer
-from command import MoveCommand
+from layer import Layer, MeshBlockLayer, TetronimoLayer
 from settings import *
 
 
@@ -19,10 +20,11 @@ class Game:
         self._timers()
 
         self.game_state = GameState(FIELD_SIZE, TILE_SIZE, TILE_MARGIN)
-        self.layers = [
+        self.layers: List[Layer] = [
+            MeshBlockLayer(self.game_state),
             TetronimoLayer(self.game_state)
         ]
-        self.commands = []
+        self.commands: List[Command] = []
 
     def _timers(self):
         # Tetronimo down timer
@@ -35,6 +37,14 @@ class Game:
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_a):
+                self.commands.append(
+                    MoveCommand(self.game_state, self.game_state.tetronimo, pygame.Vector2(-1, 0)),
+                )
+            elif event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_d):
+                self.commands.append(
+                    MoveCommand(self.game_state, self.game_state.tetronimo, pygame.Vector2(1, 0)),
+                )
             elif event.type == self.tetronimo_down_event:
                 self.tetronimo_down_trigger = True
 

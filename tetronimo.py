@@ -1,40 +1,43 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
+from dataclasses import dataclass, field
 
-from pygame import Vector2, Color
 from random import random
+from pygame import Vector2, Color
 
 
+@dataclass
 class Block:
-    def __init__(self, pos: Vector2):
-        self.pos = pos
+    pos: Vector2
+    color: Color
 
 
 class BlockMesh:
     def __init__(self, field_size: Vector2):
-        self.mesh = [[None for _ in range(field_size.x)] for _ in range(field_size.y)]
+        self.mesh: List[List[Optional[Block]]] = [
+            [None for _ in range(int(field_size.x))] for _ in range(int(field_size.y))
+        ]
 
 
+@dataclass
 class Tetronimo:
-    block_positions: List[Tuple[int, int]] = []
-    base_color: Color = Color(0, 0, 0)
+    block_positions: List[Tuple[int, int]] = field(default_factory=list)
+    base_color: Color = field(default_factory=lambda: Color(0, 0, 0))
 
     def __init__(self, spawn_pos: Vector2):
-        self.blocks = [Block(spawn_pos + Vector2(*block_pos)) for block_pos in self.block_positions]
-        self.color = Color(
-            self._random_color_element(self.base_color.r),
-            self._random_color_element(self.base_color.g),
-            self._random_color_element(self.base_color.b),
-        )
+        self.blocks: List[Block] = []
+        color = Color(*(self._random_color_element(color_element) for color_element in self.base_color))
+
+        for block_pos in self.block_positions:
+            self.blocks.append(Block(
+                spawn_pos + Vector2(*block_pos),
+                color,
+            ))
 
     def _random_color_element(self, color_element: int) -> int:
         variation = 50
         color_variation = color_element + random() * variation
         color_variation = max(0, min(255, color_variation))
         return int(color_variation)
-
-    def move(self, direction: Vector2) -> None:
-        for block in self.blocks:
-            block.pos += direction
 
 
 class TTetronimo(Tetronimo):
