@@ -3,7 +3,7 @@ from typing import List
 
 import pygame
 
-from command import Command, MoveCommand
+from command import Command, MoveCommand, RotateCommand
 from game_state import GameState
 from layer import Layer, MeshBlockLayer, TetronimoLayer
 from settings import *
@@ -37,14 +37,16 @@ class Game:
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_a):
-                self.commands.append(
-                    MoveCommand(self.game_state, self.game_state.tetronimo, pygame.Vector2(-1, 0)),
-                )
-            elif event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_d):
-                self.commands.append(
-                    MoveCommand(self.game_state, self.game_state.tetronimo, pygame.Vector2(1, 0)),
-                )
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                    self.commands.append(
+                        MoveCommand(self.game_state, self.game_state.tetronimo, pygame.Vector2(-1, 0)))
+                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                    self.commands.append(
+                        MoveCommand(self.game_state, self.game_state.tetronimo, pygame.Vector2(1, 0)))
+                elif event.key == pygame.K_UP or event.key == pygame.K_SPACE:
+                    self.commands.append(
+                        RotateCommand(self.game_state, self.game_state.tetronimo))
             elif event.type == self.tetronimo_down_event:
                 self.tetronimo_down_trigger = True
 
