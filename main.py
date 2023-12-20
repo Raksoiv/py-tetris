@@ -34,22 +34,28 @@ class Game:
         self.tetronimo_down_trigger = False
         pygame.time.set_timer(self.tetronimo_down_event, INITIAL_TETRONIMO_DOWN_INTERVAL)
 
-    def _handle_events(self):
+    def _handle_non_pause_events(self, event: pygame.event.Event) -> None:
+        if self.pause:
+            return
+
+        if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+            self.commands.append(
+                MoveCommand(self.game_state, self.game_state.tetronimo, pygame.Vector2(-1, 0)))
+        elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+            self.commands.append(
+                MoveCommand(self.game_state, self.game_state.tetronimo, pygame.Vector2(1, 0)))
+        elif event.key == pygame.K_UP or event.key == pygame.K_SPACE:
+            self.commands.append(
+                RotateCommand(self.game_state, self.game_state.tetronimo))
+
+    def _handle_events(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                    self.commands.append(
-                        MoveCommand(self.game_state, self.game_state.tetronimo, pygame.Vector2(-1, 0)))
-                elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                    self.commands.append(
-                        MoveCommand(self.game_state, self.game_state.tetronimo, pygame.Vector2(1, 0)))
-                elif event.key == pygame.K_UP or event.key == pygame.K_SPACE:
-                    self.commands.append(
-                        RotateCommand(self.game_state, self.game_state.tetronimo))
-                elif event.key == pygame.K_p:
+                self._handle_non_pause_events(event)
+                if event.key == pygame.K_p:
                     self.pause = not self.pause
 
             elif event.type == self.tetronimo_down_event:
