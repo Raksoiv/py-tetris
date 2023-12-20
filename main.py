@@ -1,3 +1,4 @@
+from signal import pause
 import sys
 from typing import List
 
@@ -19,6 +20,7 @@ class Game:
 
         self._timers()
 
+        self.pause = False
         self.game_state = GameState(FIELD_SIZE, TILE_SIZE, TILE_MARGIN)
         self.layers: List[Layer] = [
             MeshBlockLayer(self.game_state),
@@ -47,6 +49,9 @@ class Game:
                 elif event.key == pygame.K_UP or event.key == pygame.K_SPACE:
                     self.commands.append(
                         RotateCommand(self.game_state, self.game_state.tetronimo))
+                elif event.key == pygame.K_p:
+                    self.pause = not self.pause
+
             elif event.type == self.tetronimo_down_event:
                 self.tetronimo_down_trigger = True
 
@@ -72,8 +77,9 @@ class Game:
     def run(self):
         while True:
             self._handle_events()
-            self._update()
-            self._render()
+            if not self.pause:
+                self._update()
+                self._render()
             self.clock.tick(FPS)
 
 
