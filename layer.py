@@ -59,7 +59,6 @@ class MeshBlockLayer(Layer, GameStateObserver):
     def render(self, surface: Surface) -> None:
         if self.surface is None:
             self.surface = Surface(surface.get_size(), flags=surface.get_flags())
-            self.surface.fill(Color(0, 0, 0, 0))
+            self.surface.fill((36, 36, 36))
 
-        if self.updated:
-            surface.blit(self.surface, (0, 0))
+        surface.blit(self.surface, (0, 0))
