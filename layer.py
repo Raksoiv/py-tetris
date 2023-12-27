@@ -1,5 +1,5 @@
 from pygame import Surface, Color
-from typing import Optional
+from typing import Optional, Tuple
 from pygame.draw import rect
 
 from game_state import GameState, GameStateObserver
@@ -35,19 +35,20 @@ class TetronimoLayer(Layer):
 
 
 class MeshBlockLayer(Layer, GameStateObserver):
-    def __init__(self, game_state: GameState) -> None:
+    def __init__(self, game_state: GameState, background_color: Tuple[int, int, int],
+                 field_resolution: Tuple[int, int]) -> None:
         super().__init__(game_state)
-        self.surface: Optional[Surface] = None
         self.updated = False
+        self.background_color = background_color
+
+        self.surface: Surface = Surface(field_resolution)
+        self.surface.fill(self.background_color)
 
         game_state.add_observer(self)
 
     # signal
     def on_tetronimo_solidify(self) -> None:
-        if self.surface is None:
-            return
-
-        self.surface.fill((36, 36, 36))
+        self.surface.fill(self.background_color)
 
         for row in self.game_state.block_mesh.mesh:
             for block in row:
@@ -57,8 +58,13 @@ class MeshBlockLayer(Layer, GameStateObserver):
         self.updated = True
 
     def render(self, surface: Surface) -> None:
-        if self.surface is None:
-            self.surface = Surface(surface.get_size(), flags=surface.get_flags())
-            self.surface.fill((36, 36, 36))
-
         surface.blit(self.surface, (0, 0))
+
+
+class UILayer(Layer):
+    def __init__(self, game_state: GameState, background_color: Tuple[int, int, int]):
+        super().__init__(game_state)
+        self.background_color = background_color
+
+    def render(self, surface: Surface) -> None:
+        surface.fill(self.background_color)
