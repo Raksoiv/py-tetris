@@ -2,11 +2,11 @@
 
 ## Details
 
-__Platform:__ PC
-__Price:__ Free
-__Playtime:__ 15 mins
-__Age Raiting:__ Everyone
-__Planned Release:__ Q1 2024
+__- Platform:__ PC
+__- Price:__ Free
+__- Playtime:__ 15 mins
+__- Age Raiting:__ Everyone
+__- Planned Release:__ Q1 2024
 
 ## Executive Pitch
 
