@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Tuple
+from typing import List
 import sys
 
 import pygame
@@ -8,7 +8,6 @@ from command import Command, MoveCommand, RotateCommand
 from game_state import GameState
 from layer import Layer, MeshBlockLayer, TetronimoLayer, UILayer
 import settings
-
 
 
 class Game:
@@ -84,6 +83,11 @@ class BaseLevel(Level):
     def __init__(self, game: Game):
         super().__init__(game)
 
+        # Colors
+        ui_background_color = (102, 102, 112)
+        ui_text_color = (238, 255, 255)
+        field_background_color = (51, 51, 58)
+
         self._timers(settings.INITIAL_TETRONIMO_DOWN_INTERVAL)
 
         self.game_state = GameState(
@@ -91,11 +95,25 @@ class BaseLevel(Level):
             settings.TILE_SIZE,
             settings.TILE_MARGIN,
         )
+
+        ui_resolution = (
+            settings.WINDOW_RESOLUTION[0] - settings.FIELD_RESOLUTION[0],
+            settings.WINDOW_RESOLUTION[1],
+        )
+        ui_x_margin = settings.FIELD_RESOLUTION[0]
         self.layers: List[Layer] = [
-            UILayer(self.game_state, (102, 102, 102)),
-            MeshBlockLayer(self.game_state, (51, 51, 51), settings.FIELD_RESOLUTION),
+            UILayer(
+                self.game_state,
+                ui_resolution,
+                ui_x_margin,
+                ui_background_color,
+                settings.ROBOTO_FONT_PATH,
+                ui_text_color,
+            ),
+            MeshBlockLayer(self.game_state, field_background_color, settings.FIELD_RESOLUTION),
             TetronimoLayer(self.game_state)
         ]
+
         self.commands: List[Command] = []
 
     def _timers(self, initial_tetronimo_down_interval):
@@ -174,9 +192,9 @@ class MainMenu(Level):
                 self.window_resolution[1] * (.25 + (i + 1) * .15),
             )
             option["border_box"] = pygame.Rect(
-                200,
+                option["pos"][0] - 48,
                 option["pos"][1] - 10,
-                200,
+                option["surface"].get_width() + 96,
                 option["surface"].get_height() + 20,
             )
 

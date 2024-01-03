@@ -24,6 +24,7 @@ class GameState(Observable):
 
         # Variables
         self.block_mesh = BlockMesh(self.field_size)
+        self.next_tetronimo: Tetronimo = choice(TETRONIMOS)(self.spawn_pos)  # Next tetronimo
         self.tetronimo: Tetronimo = choice(TETRONIMOS)(self.spawn_pos)  # Starting tetronimo
 
     def _pos_inside_field(self, pos: Vector2) -> bool:
@@ -33,7 +34,8 @@ class GameState(Observable):
         return self.block_mesh.mesh[int(pos.y)][int(pos.x)] is None
 
     def _instantiate_new_tetronimo(self) -> None:
-        self.tetronimo = choice(TETRONIMOS)(self.spawn_pos)
+        self.tetronimo = self.next_tetronimo
+        self.next_tetronimo = choice(TETRONIMOS)(self.spawn_pos)
 
     def _check_lines(self) -> None:
         row_to = total_rows = len(self.block_mesh.mesh) - 1
@@ -48,10 +50,10 @@ class GameState(Observable):
 
             # Copy row from row_from to row_to
             for col_i, upper_block in enumerate(self.block_mesh.mesh[row_from]):
-                    self.block_mesh.mesh[row_to][col_i] = upper_block
+                self.block_mesh.mesh[row_to][col_i] = upper_block
 
-                    if upper_block is not None:
-                        upper_block.pos = Vector2(col_i, row_to)
+                if upper_block is not None:
+                    upper_block.pos = Vector2(col_i, row_to)
 
             # move row_from up if row_to is not full
             if any(block is None for block in self.block_mesh.mesh[row_from]):

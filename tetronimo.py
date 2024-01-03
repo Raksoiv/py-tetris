@@ -33,6 +33,10 @@ class Tetronimo:
                 color,
             ))
 
+    def __str__(self) -> str:
+        block_pos = [block.pos for block in self.blocks]
+        return f"{self.__class__.__name__}: {block_pos}"
+
     def _random_color_element(self, color_element: int) -> int:
         variation = 50
         color_variation = color_element + random() * variation
