@@ -88,7 +88,7 @@ class BaseLevel(Level):
         ui_text_color = (238, 255, 255)
         field_background_color = (51, 51, 58)
 
-        self._timers(settings.INITIAL_TETRONIMO_DOWN_INTERVAL)
+        self._init_timers()
 
         self.game_state = GameState(
             settings.FIELD_SIZE,
@@ -118,11 +118,14 @@ class BaseLevel(Level):
 
         self.commands: List[Command] = []
 
-    def _timers(self, initial_tetronimo_down_interval):
+    def _init_timers(self):
         # Tetronimo down timer
+        self._tetromino_down_timer(settings.DEFAULT_TETRONIMO_DOWN_INTERVAL)
+
+    def _tetromino_down_timer(self, tetronimo_down_interval):
         self.tetronimo_down_event = pygame.USEREVENT + 0
         self.tetronimo_down_trigger = False
-        pygame.time.set_timer(self.tetronimo_down_event, initial_tetronimo_down_interval)
+        pygame.time.set_timer(self.tetronimo_down_event, tetronimo_down_interval)
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYDOWN:
@@ -135,6 +138,11 @@ class BaseLevel(Level):
             elif event.key == pygame.K_UP or event.key == pygame.K_SPACE:
                 self.commands.append(
                     RotateCommand(self.game_state, self.game_state.tetronimo))
+            elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                self._tetromino_down_timer(settings.ACCELERATED_TETRONIMO_DOWN_INTERVAL)
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                self._tetromino_down_timer(settings.DEFAULT_TETRONIMO_DOWN_INTERVAL)
 
         elif event.type == self.tetronimo_down_event:
             self.tetronimo_down_trigger = True
