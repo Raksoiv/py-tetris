@@ -10,23 +10,20 @@
 
 ## Executive Pitch
 
-Py-Tetris is a clone of the classic Tetris. Your objective is to create lines full of blocks
-to eliminate them, you lose if a piece reaches the top row in the field.
-What makes it unique is that you can buy powerups like changing the next piece, or
-buying a 3-block piece replacing the next one. Using the amount of blocks destroyed as currency.
+Py-Time-Tetris is a clone of the classic Tetris with a twist, you have a limited amount of time
+to play, if you want to increase your available time you need to break lines containing at least
+one time block. Each time you level up you will gain an instant power up to help you
 
 ## Mechanics
 
-- Tetris-like gameplay on the field part of the game
+- Tetris-like gameplay
 - Combo: Every time you complete a row or rows in success (subsequent moves)
 you increase the combo bonus
-- Currency: Every time you complete a row gain blocks as a reward based on your
-combo and rows deleted
-- You can buy powerups based on your current blocks
-    - 3-block piece L/I
-    - Change next piece
-- Every time you bought one item it gets pricy
-- Power-ups require a treshold before being available
+- Time attack: You have a limited amount of time to play
+    - You can increase your time by completing rows
+- Power ups: Every time you level up, you can use a random power up
+    - To level up, you must complete rows
+    - Every power up has also a down side
 
 ## Story
 
