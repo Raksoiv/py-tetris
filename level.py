@@ -109,6 +109,8 @@ class BaseLevel(Level):
                 ui_background_color,
                 settings.ROBOTO_FONT_PATH,
                 ui_text_color,
+                settings.ROBOTO_MONO_FONT_PATH,
+                ui_text_color,
             ),
             MeshBlockLayer(self.game_state, field_background_color, settings.FIELD_RESOLUTION),
             TetronimoLayer(self.game_state)

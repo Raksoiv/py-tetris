@@ -17,3 +17,4 @@ INITIAL_TETRONIMO_DOWN_INTERVAL = 400
 # Assets
 BOREL_FONT_PATH = "assets/fonts/Borel-Regular.ttf"
 ROBOTO_FONT_PATH = "assets/fonts/RobotoCondensed-Regular.ttf"
+ROBOTO_MONO_FONT_PATH = "assets/fonts/RobotoMono-Regular.ttf"

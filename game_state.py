@@ -26,6 +26,7 @@ class GameState(Observable):
         self.block_mesh = BlockMesh(self.field_size)
         self.next_tetronimo: Tetronimo = choice(TETRONIMOS)(self.spawn_pos)  # Next tetronimo
         self.tetronimo: Tetronimo = choice(TETRONIMOS)(self.spawn_pos)  # Starting tetronimo
+        self.score = 0
 
     def _pos_inside_field(self, pos: Vector2) -> bool:
         return 0 <= pos.x < self.field_size.x and pos.y < self.field_size.y
@@ -37,27 +38,30 @@ class GameState(Observable):
         self.tetronimo = self.next_tetronimo
         self.next_tetronimo = choice(TETRONIMOS)(self.spawn_pos)
 
+    def _increase_score(self, completed_lines: int) -> None:
+        if completed_lines == 1:
+            self.score += 40
+        elif completed_lines == 2:
+            self.score += 100
+        elif completed_lines == 3:
+            self.score += 300
+        elif completed_lines == 4:
+            self.score += 1200
+
     def _check_lines(self) -> None:
-        row_to = total_rows = len(self.block_mesh.mesh) - 1
-        empty_found = False
+        completed_lines = 0
+        for y in range(len(self.block_mesh.mesh) - 1, -1, -1):
+            for x in range(len(self.block_mesh.mesh[y])):
+                new_y = y + completed_lines
+                self.block_mesh.mesh[new_y][x] = self.block_mesh.mesh[y][x]
 
-        for row_from in range(total_rows, -1, -1):
-            if empty_found:
-                return
+                block = self.block_mesh.mesh[new_y][x]
+                if block is not None:
+                    block.pos = Vector2(x, new_y)
+            if all(block is not None for block in self.block_mesh.mesh[y]):
+                completed_lines += 1
 
-            if all(block is None for block in self.block_mesh.mesh[row_to]):
-                empty_found = True
-
-            # Copy row from row_from to row_to
-            for col_i, upper_block in enumerate(self.block_mesh.mesh[row_from]):
-                self.block_mesh.mesh[row_to][col_i] = upper_block
-
-                if upper_block is not None:
-                    upper_block.pos = Vector2(col_i, row_to)
-
-            # move row_from up if row_to is not full
-            if any(block is None for block in self.block_mesh.mesh[row_from]):
-                row_to -= 1
+        self._increase_score(completed_lines)
 
     def check_blocks_collide(self, blocks: List[Vector2]) -> bool:
         return not all(self._pos_inside_field(block) and self._pos_not_hit_mesh(block) for block in blocks)

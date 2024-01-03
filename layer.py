@@ -65,22 +65,50 @@ class UILayer(Layer):
     def __init__(
             self, game_state: GameState, ui_resolution: Tuple[int, int], ui_x_margin: int,
             background_color: Tuple[int, int, int], font_path: str,
-            font_color: Tuple[int, int, int],
+            font_color: Tuple[int, int, int], font_mono_path: str,
+            font_mono_color: Tuple[int, int, int]
             ) -> None:
         super().__init__(game_state)
 
         self.background_color = background_color
+        self.ui_resolution = ui_resolution
+        self.ui_x_margin = ui_x_margin
 
         font = Font(font_path, 30)
+        self.font_mono = Font(font_mono_path, 30)
+        self.font_mono_color = font_mono_color
+
         self.next_piece_text_surface = font.render("Next piece:", True, font_color)
         self.next_piece_text_pos = (
-            ui_x_margin + (ui_resolution[0] - self.next_piece_text_surface.get_width()) // 2,
-            ui_resolution[1] * .05,
+            self.ui_x_margin + (
+                self.ui_resolution[0] - self.next_piece_text_surface.get_width()
+            ) // 2,
+            self.ui_resolution[1] * .05,
         )
 
-        self.next_piece_top = ui_resolution[1] * .2
-        self.next_piece_center_x = ui_resolution[0] // 2
-        self.piece_margin_x = ui_x_margin
+        self.next_piece_top = self.ui_resolution[1] * .2
+        self.next_piece_center_x = self.ui_resolution[0] // 2
+        self.piece_margin_x = self.ui_x_margin
+
+        game_state.add_observer(self)
+        self.score_text_surface = font.render("Score:", True, font_color)
+        self.score_text_pos = (
+            self.ui_x_margin + (self.ui_resolution[0] - self.score_text_surface.get_width()) // 2,
+            self.ui_resolution[1] * .3,
+        )
+        self.score_surface = self.font_mono.render("0", True, self.font_mono_color)
+        self.score_pos = (
+            self.ui_x_margin + (self.ui_resolution[0] - self.score_surface.get_width()) // 2,
+            self.ui_resolution[1] * .4,
+        )
+
+    def on_tetronimo_solidify(self) -> None:
+        self.score_surface = self.font_mono.render(
+            str(self.game_state.score), True, self.font_mono_color)
+        self.score_pos = (
+            self.ui_x_margin + (self.ui_resolution[0] - self.score_surface.get_width()) // 2,
+            self.ui_resolution[1] * .4,
+        )
 
     def _render_next_piece(self, surface: Surface) -> None:
         tile_size = self.tile_size // 1.5
@@ -99,5 +127,9 @@ class UILayer(Layer):
 
     def render(self, surface: Surface) -> None:
         surface.fill(self.background_color)
+        # Next piece UI
         surface.blit(self.next_piece_text_surface, self.next_piece_text_pos)
         self._render_next_piece(surface)
+        # Score UI
+        surface.blit(self.score_text_surface, self.score_text_pos)
+        surface.blit(self.score_surface, self.score_pos)
