@@ -6,34 +6,19 @@ import pygame.mouse
 from pygame import Surface
 from pygame.font import Font
 
-from objects.ui import UIButton, uibutton_factory
+from command import Command
+from command.ui.button import button_hover, button_normal
+from objects.ui import uibutton_factory
 
-from .game import Game
 from .level import Level, LevelManager
 
 BOREL_FONT_PATH = "assets/fonts/Borel-Regular.ttf"
 ROBOTO_FONT_PATH = "assets/fonts/RobotoCondensed-Regular.ttf"
 
-Command = Callable[[], None]
-
-
-def button_hover(button: UIButton) -> Command:
-    def _button_hover() -> None:
-        button.set_hover_active()
-
-    return _button_hover
-
-
-def button_normal(button: UIButton) -> Command:
-    def _button_normal() -> None:
-        button.set_normal_active()
-
-    return _button_normal
-
 
 def button_play(level_manager: LevelManager) -> Command:
     def _button_play() -> None:
-        level_manager.transition_to(Game(level_manager))
+        level_manager.transition_to("game")
 
     return _button_play
 
@@ -53,7 +38,7 @@ def button_exit() -> Command:
 
 
 class MainMenuLevel(Level):
-    def __init__(self, game):
+    def __init__(self, game: LevelManager):
         super().__init__(game)
 
         # constants
