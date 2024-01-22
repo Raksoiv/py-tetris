@@ -58,6 +58,14 @@ def tetronimo_hit_top(tetronimo: Tetronimo) -> bool:
 def tetronimo_bottom_hit_mesh_block(
     mesh_block: MeshBlock, tetronimo: Tetronimo
 ) -> bool:
+    # Ensure fresh spawn tetromino don't hit the mesh block
+    if any(block.pos[1] < 0 for block in tetronimo):
+        return False
     return any(
-        mesh_block[block.pos[1] + 1][block.pos[0]] is not None for block in tetronimo
+        mesh_block[block.pos[1]][block.pos[0]] is not None for block in tetronimo
     )
+
+
+def tetromino_move(tetromino: Tetronimo, direction: tuple[int, int]) -> None:
+    for block in tetromino:
+        block.pos = (block.pos[0] + direction[0], block.pos[1] + direction[1])

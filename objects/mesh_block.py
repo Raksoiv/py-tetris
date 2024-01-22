@@ -11,13 +11,9 @@ def add_tetronimo_to_mesh_block(mesh_block: MeshBlock, tetronimo: Tetronimo) -> 
 
 
 def block_pos_hit_mesh_block(mesh_block: MeshBlock, block_pos: tuple[int, int]) -> bool:
+    if block_pos[1] >= len(mesh_block) or block_pos[1] < 0:
+        return False
     return mesh_block[block_pos[1]][block_pos[0]] is not None
-
-
-def block_bottom_hit_mesh_block(
-    mesh_block: MeshBlock, block_pos: tuple[int, int]
-) -> bool:
-    return mesh_block[block_pos[1] + 1][block_pos[0]] is not None
 
 
 def remove_completed_lines(mesh_block: MeshBlock) -> int:

@@ -17,6 +17,7 @@ from objects.mesh_block import (
 )
 from objects.tetronimo import (
     get_random_tetronimo,
+    tetromino_move,
     tetronimo_bottom_hit_mesh_block,
     tetronimo_hit_bottom,
     tetronimo_hit_top,
@@ -165,7 +166,14 @@ class GameLevel(Level):
         if self.stop_update:
             return
 
+        for command in self.commands:
+            command()
+        self.commands.clear()
+
         if self._should_add_tetronimo_to_mesh_block():
+            # Move tetronimo up to avoid render in collsision
+            tetromino_move(self.actual_tetronimo, (0, -1))
+
             if tetronimo_hit_top(self.actual_tetronimo):
                 self.commands.clear()
                 self.stop_update = True
@@ -178,10 +186,6 @@ class GameLevel(Level):
 
             self.actual_tetronimo = self.next_tetronimo
             self.next_tetronimo = get_random_tetronimo(SPAWN_POS)
-
-        for command in self.commands:
-            command()
-        self.commands.clear()
 
     def render(self, screen: Surface) -> None:
         for layer in self.layers:
