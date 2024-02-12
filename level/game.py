@@ -1,5 +1,3 @@
-from functools import partial
-
 import pygame.constants
 from pygame import Surface
 from pygame.event import Event
@@ -7,6 +5,7 @@ from pygame.time import set_timer
 
 from command import Command
 from command.tetronimo import move_tetronimo, rotate_tetronimo
+from command.ui.menu import active_menu
 from layer import BackgroundLayer, HUDLayer, Layer, MeshBlockLayer, TetronimoLayer
 from objects import Tetronimo
 from objects.events import GAME_EXIT_EVENT, GAME_RESTART_EVENT, TETRONIMO_DOWN_EVENT
@@ -24,7 +23,7 @@ from objects.tetronimo import (
 )
 
 from .level import Level, LevelManager
-from .menu.game_over import GameOverMenu
+from .menu import BaseMenu, GameMenuMenu, GameOverMenu
 
 ACCELERATED_TETRONIMO_DOWN_INTERVAL = 25
 DEFAULT_TETRONIMO_DOWN_INTERVAL = 500
@@ -32,8 +31,11 @@ FIELD_SIZE = (10, 20)
 SPAWN_POS = (4, 0)
 
 
-def set_tetro_down_timer(interval: int) -> None:
-    set_timer(TETRONIMO_DOWN_EVENT, interval)
+def set_tetro_down_timer(interval: int) -> Command:
+    def _set_tetro_down_timer() -> None:
+        set_timer(TETRONIMO_DOWN_EVENT, interval)
+
+    return _set_tetro_down_timer
 
 
 def calculate_score(completed_lines: int) -> int:
@@ -61,9 +63,6 @@ class GameLevel(Level):
         self.score = 0
         self.stop_update = False
 
-        # events
-        set_tetro_down_timer(DEFAULT_TETRONIMO_DOWN_INTERVAL)
-
         # layers
         self.layers: list[Layer] = [
             BackgroundLayer(),
@@ -72,19 +71,21 @@ class GameLevel(Level):
             HUDLayer(self),
         ]
 
-        # commands
-        self.commands: list[Command] = []
+        # initial commands
+        self.commands: list[Command] = [
+            set_tetro_down_timer(DEFAULT_TETRONIMO_DOWN_INTERVAL),
+        ]
 
         # menus
-        self.menus = {
+        self.menus: dict[str, BaseMenu] = {
             "game_over": GameOverMenu(self),
+            "game_menu": GameMenuMenu(self),
         }
 
     def handle_event(self, event: Event) -> None:
         if event.type == TETRONIMO_DOWN_EVENT:
             self.commands.append(
-                partial(
-                    move_tetronimo,
+                move_tetronimo(
                     FIELD_SIZE,
                     self.mesh_block,
                     self.actual_tetronimo,
@@ -101,8 +102,7 @@ class GameLevel(Level):
                 or event.key == pygame.constants.K_a
             ):
                 self.commands.append(
-                    partial(
-                        move_tetronimo,
+                    move_tetronimo(
                         FIELD_SIZE,
                         self.mesh_block,
                         self.actual_tetronimo,
@@ -114,8 +114,7 @@ class GameLevel(Level):
                 or event.key == pygame.constants.K_d
             ):
                 self.commands.append(
-                    partial(
-                        move_tetronimo,
+                    move_tetronimo(
                         FIELD_SIZE,
                         self.mesh_block,
                         self.actual_tetronimo,
@@ -127,8 +126,7 @@ class GameLevel(Level):
                 or event.key == pygame.constants.K_SPACE
             ):
                 self.commands.append(
-                    partial(
-                        rotate_tetronimo,
+                    rotate_tetronimo(
                         FIELD_SIZE,
                         self.mesh_block,
                         self.actual_tetronimo,
@@ -140,15 +138,17 @@ class GameLevel(Level):
                 or event.key == pygame.constants.K_s
             ):
                 self.commands.append(
-                    partial(set_tetro_down_timer, ACCELERATED_TETRONIMO_DOWN_INTERVAL)
+                    set_tetro_down_timer(ACCELERATED_TETRONIMO_DOWN_INTERVAL),
                 )
+            elif event.key == pygame.constants.K_ESCAPE:
+                self.commands.append(active_menu(self, self.menus["game_menu"]))
         elif event.type == pygame.constants.KEYUP:
             if (
                 event.key == pygame.constants.K_DOWN
                 or event.key == pygame.constants.K_s
             ):
                 self.commands.append(
-                    partial(set_tetro_down_timer, DEFAULT_TETRONIMO_DOWN_INTERVAL)
+                    set_tetro_down_timer(DEFAULT_TETRONIMO_DOWN_INTERVAL),
                 )
 
         for menu in self.menus.values():
@@ -160,6 +160,9 @@ class GameLevel(Level):
         ) or tetronimo_bottom_hit_mesh_block(self.mesh_block, self.actual_tetronimo)
 
     def update(self, dt: float) -> None:
+        if self.stop_update:
+            self.commands.clear()
+
         for menu in self.menus.values():
             menu.update(dt)
 
@@ -175,9 +178,7 @@ class GameLevel(Level):
             tetromino_move(self.actual_tetronimo, (0, -1))
 
             if tetronimo_hit_top(self.actual_tetronimo):
-                self.commands.clear()
-                self.stop_update = True
-                self.menus["game_over"].active = True
+                self.commands.append(active_menu(self, self.menus["game_over"]))
                 return
 
             add_tetronimo_to_mesh_block(self.mesh_block, self.actual_tetronimo)
