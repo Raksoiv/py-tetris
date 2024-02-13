@@ -6,9 +6,14 @@ from pygame.time import set_timer
 from command import Command
 from command.tetronimo import move_tetronimo, rotate_tetronimo
 from command.ui.menu import active_menu
-from layer import BackgroundLayer, HUDLayer, Layer, MeshBlockLayer, TetronimoLayer
+from layer import BackgroundLayer, Layer, MeshBlockLayer, TetronimoLayer
 from objects import Tetronimo
-from objects.events import GAME_EXIT_EVENT, GAME_RESTART_EVENT, TETRONIMO_DOWN_EVENT
+from objects.events import (
+    GAME_EXIT_EVENT,
+    GAME_OPEN_MENU_EVENT,
+    GAME_RESTART_EVENT,
+    TETRONIMO_DOWN_EVENT,
+)
 from objects.mesh_block import (
     add_tetronimo_to_mesh_block,
     new_mesh_block,
@@ -22,6 +27,7 @@ from objects.tetronimo import (
     tetronimo_hit_top,
 )
 
+from .hud import HUD
 from .level import Level, LevelManager
 from .menu import BaseMenu, GameMenuMenu, GameOverMenu
 
@@ -68,8 +74,10 @@ class GameLevel(Level):
             BackgroundLayer(),
             MeshBlockLayer(self, FIELD_SIZE),
             TetronimoLayer(self),
-            HUDLayer(self),
         ]
+
+        # HUD
+        self.hud = HUD(self)
 
         # initial commands
         self.commands: list[Command] = [
@@ -96,6 +104,8 @@ class GameLevel(Level):
             self.game.transition_to("game")
         elif event.type == GAME_EXIT_EVENT:
             self.game.transition_to("main_menu")
+        elif event.type == GAME_OPEN_MENU_EVENT:
+            self.commands.append(active_menu(self, self.menus["game_menu"]))
         elif event.type == pygame.constants.KEYDOWN:
             if (
                 event.key == pygame.constants.K_LEFT
@@ -151,6 +161,8 @@ class GameLevel(Level):
                     set_tetro_down_timer(DEFAULT_TETRONIMO_DOWN_INTERVAL),
                 )
 
+        self.hud.handle_event(event)
+
         for menu in self.menus.values():
             menu.handle_event(event)
 
@@ -173,6 +185,8 @@ class GameLevel(Level):
             command()
         self.commands.clear()
 
+        self.hud.update(dt)
+
         if self._should_add_tetronimo_to_mesh_block():
             # Move tetronimo up to avoid render in collsision
             tetromino_move(self.actual_tetronimo, (0, -1))
@@ -191,6 +205,8 @@ class GameLevel(Level):
     def render(self, screen: Surface) -> None:
         for layer in self.layers:
             layer.render(screen)
+
+        self.hud.render(screen)
 
         for menu in self.menus.values():
             menu.render(screen)
