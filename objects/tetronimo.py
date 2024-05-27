@@ -1,4 +1,4 @@
-from random import choice
+from random import shuffle
 
 from . import Tetronimo
 from .block import Block, block_pos_hit_bottom, block_pos_hit_top
@@ -36,14 +36,19 @@ TETRONIMOS: dict[str, tuple[tuple[int, int, int], list[tuple[int, int]]]] = {
 }
 
 
-def get_random_tetronimo(spawn_pos: tuple[int, int]) -> Tetronimo:
-    tetronimo_key = choice([key for key in TETRONIMOS.keys()])
+def get_random_tetronimo_bag(spawn_pos: tuple[int, int]) -> list[Tetronimo]:
+    tetronimo_bag = list(TETRONIMOS.keys())
+    shuffle(tetronimo_bag)
 
     return [
-        Block(
-            (pos[0] + spawn_pos[0], pos[1] + spawn_pos[1]), TETRONIMOS[tetronimo_key][0]
-        )
-        for pos in TETRONIMOS[tetronimo_key][1]
+        [
+            Block(
+                (pos[0] + spawn_pos[0], pos[1] + spawn_pos[1]),
+                TETRONIMOS[tetronimo_key][0],
+            )
+            for pos in TETRONIMOS[tetronimo_key][1]
+        ]
+        for tetronimo_key in tetronimo_bag
     ]
 
 

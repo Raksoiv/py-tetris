@@ -20,7 +20,7 @@ from objects.mesh_block import (
     remove_completed_lines,
 )
 from objects.tetronimo import (
-    get_random_tetronimo,
+    get_random_tetronimo_bag,
     tetromino_move,
     tetronimo_bottom_hit_mesh_block,
     tetronimo_hit_bottom,
@@ -63,8 +63,9 @@ class GameLevel(Level):
         # constants
 
         # variables
-        self.actual_tetronimo: Tetronimo = get_random_tetronimo(SPAWN_POS)
-        self.next_tetronimo: Tetronimo = get_random_tetronimo(SPAWN_POS)
+        self.tetronimo_bag = get_random_tetronimo_bag(SPAWN_POS)
+        self.actual_tetronimo = self.tetronimo_bag.pop()
+        self.next_tetronimo = self.tetronimo_bag.pop()
         self.mesh_block = new_mesh_block(*FIELD_SIZE)
         self.score = 0
         self.stop_update = False
@@ -200,7 +201,9 @@ class GameLevel(Level):
             self.score += calculate_score(completed_lines)
 
             self.actual_tetronimo = self.next_tetronimo
-            self.next_tetronimo = get_random_tetronimo(SPAWN_POS)
+            if not self.tetronimo_bag:
+                self.tetronimo_bag = get_random_tetronimo_bag(SPAWN_POS)
+            self.next_tetronimo = self.tetronimo_bag.pop()
 
     def render(self, screen: Surface) -> None:
         for layer in self.layers:
